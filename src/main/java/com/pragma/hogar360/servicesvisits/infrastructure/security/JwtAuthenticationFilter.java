@@ -25,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     public static final String USER_ID_REQUEST_ATTRIBUTE = "userId";
+    public static final String USER_EMAIL_REQUEST_ATTRIBUTE = "email";
 
     @Override
     protected void doFilterInternal(
@@ -47,6 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtService.isTokenValid(jwt)) {
                 final Long userId = jwtService.extractUserIdFromToken(jwt);
+                final String email = jwtService.extractEmailFromToken(jwt);
                 String username = null;
                 if (userId != null) {
                     username = String.valueOf(userId);
@@ -72,12 +74,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 } else {
                     log.warn("⚠️ Could not extract user ID from token.");
                 }
-
+                if (email != null) {
+                    log.info("📧 Email extracted from JWT: {}", email);
+                    request.setAttribute(USER_EMAIL_REQUEST_ATTRIBUTE, email);
+                    log.debug("📧 Email extracted from token and set as request attribute: {}", email);
+                    //username = (username != null) ? username : email;
+                } else {
+                    log.warn("⚠️ Could not extract email from token.");
+                }
             } else {
                 log.warn("⚠️ Invalid JWT token");
             }
         }
-
         filterChain.doFilter(request, response);
     }
 }

@@ -33,6 +33,17 @@ public class JwtService {
             return null; // O podrías lanzar una excepción personalizada
         }
     }
+    public String extractEmailFromToken(String token) {
+        log.info("JwtService (visits) - Token recibido para extraer email: {}", token);
+        try {
+            String email = extractClaim(token, claims -> claims.get("email", String.class));
+            log.debug("JwtService (visits) - Email extraído del token: {}", email);
+            return email;
+        } catch (Exception e) {
+            log.error("JwtService (visits) - Error al extraer el email del token: {}", e.getMessage());
+            return null;
+        }
+    }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         log.debug("JwtService (home) - Extrayendo claim del token: {}", token);

@@ -1,8 +1,11 @@
 package com.pragma.hogar360.servicesvisits.domain.usecases;
 
 import com.pragma.hogar360.servicesvisits.domain.model.TimeSlotModel;
+import com.pragma.hogar360.servicesvisits.domain.model.TimeSlotQueryModel;
 import com.pragma.hogar360.servicesvisits.domain.ports.in.TimeSlotServicePort;
 import com.pragma.hogar360.servicesvisits.domain.ports.out.TimeSlotPersistencePort;
+import com.pragma.hogar360.servicesvisits.domain.utils.Pagination;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -74,4 +77,15 @@ public class TimeSlotUseCase implements TimeSlotServicePort {
             throw new IllegalArgumentException("La casa con ID " + requestedHomeId + " no coincide con la casa encontrada.");
         }
     }
+    @Override
+    public Pagination<TimeSlotModel> findTimeSlotByFilters(
+            TimeSlotQueryModel timeSlotQueryModel,
+            Integer page,
+            Integer size,
+            String sortBy,
+            String sortDirection
+    ){
+        return timeSlotPersistencePort.findTimeSlotByFilters(timeSlotQueryModel,page,size,sortBy,sortDirection);
+    }
+
 }
