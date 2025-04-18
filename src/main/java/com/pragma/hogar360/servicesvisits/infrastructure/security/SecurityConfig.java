@@ -30,6 +30,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/time-slots/create").hasRole("SELLER")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/visits/create").hasRole("CUSTOMER")
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

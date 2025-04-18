@@ -1,6 +1,9 @@
 package com.pragma.hogar360.servicesvisits.infrastructure.security;
 
+import com.pragma.hogar360.servicesvisits.infrastructure.exceptions.UnauthorizedException;
+import com.pragma.hogar360.servicesvisits.infrastructure.exceptionshandler.ExceptionConstants;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -31,6 +34,17 @@ public class JwtService {
         } catch (NumberFormatException e) {
             log.error("JwtService (home) - Formato inválido de userId en el subject del token: {}", subject);
             return null; // O podrías lanzar una excepción personalizada
+        }
+    }
+    public String extractEmailFromToken(String token) {
+        log.info("JwtService (visits) - Token recibido para extraer email: {}", token);
+        try {
+            String email = extractClaim(token, claims -> claims.get("email", String.class));
+            log.debug("JwtService (visits) - Email extraído del token: {}", email);
+            return email;
+        } catch (Exception e) {
+            log.error("JwtService (visits) - Error al extraer el email del token: {}", e.getMessage());
+            return null;
         }
     }
 
@@ -72,14 +86,21 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        log.debug("JwtService (home) - Parsing token: {}", token);
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        //log.debug("JwtService (home) - Parsing token: {}", token);
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            log.warn("Token expired: {}", e.getMessage());
+            throw new UnauthorizedException(ExceptionConstants.INVALID_TOKEN_ERROR_CODE,ExceptionConstants.JWT_EXPIRED_MESSAGE_EN);
+
+        }
     }
+
 
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
