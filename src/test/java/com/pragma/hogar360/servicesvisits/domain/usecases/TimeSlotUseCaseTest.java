@@ -11,6 +11,8 @@ import com.pragma.hogar360.servicesvisits.domain.utils.constants.DomainConstants
 import com.pragma.hogar360.servicesvisits.factory.TimeSlotModelFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -210,40 +212,19 @@ class TimeSlotUseCaseTest {
         assertThrows(BadRequestException.class, () -> timeSlotUseCase.findTimeSlotByFilters(queryModel, page, size, sortBy, sortDirection));
         verify(timeSlotPersistencePort, never()).findTimeSlotByFilters(any(), anyInt(), anyInt(), anyString(), anyString());
     }
+    @ParameterizedTest
+    @CsvSource({
+            "0, 0, startTime, asc",
+            "0, 10, invalidField, asc",
+            "0, 10, startTime, invalidDir"
+    })
+    void testFindTimeSlotByFilters_InvalidParameters(int page, int size, String sortBy, String sortDirection) {
 
-    @Test
-    void testFindTimeSlotByFilters_InvalidSize() {
         TimeSlotQueryModel queryModel = new TimeSlotQueryModel();
-        int page = 0;
-        int size = 0;
-        String sortBy = "startTime";
-        String sortDirection = "asc";
 
-        assertThrows(BadRequestException.class, () -> timeSlotUseCase.findTimeSlotByFilters(queryModel, page, size, sortBy, sortDirection));
-        verify(timeSlotPersistencePort, never()).findTimeSlotByFilters(any(), anyInt(), anyInt(), anyString(), anyString());
-    }
+        assertThrows(BadRequestException.class, () ->
+                timeSlotUseCase.findTimeSlotByFilters(queryModel, page, size, sortBy, sortDirection));
 
-    @Test
-    void testFindTimeSlotByFilters_InvalidSortBy() {
-        TimeSlotQueryModel queryModel = new TimeSlotQueryModel();
-        int page = 0;
-        int size = 10;
-        String sortBy = "invalidField";
-        String sortDirection = "asc";
-
-        assertThrows(BadRequestException.class, () -> timeSlotUseCase.findTimeSlotByFilters(queryModel, page, size, sortBy, sortDirection));
-        verify(timeSlotPersistencePort, never()).findTimeSlotByFilters(any(), anyInt(), anyInt(), anyString(), anyString());
-    }
-
-    @Test
-    void testFindTimeSlotByFilters_InvalidSortDirection() {
-        TimeSlotQueryModel queryModel = new TimeSlotQueryModel();
-        int page = 0;
-        int size = 10;
-        String sortBy = "startTime";
-        String sortDirection = "invalidDirection";
-
-        assertThrows(BadRequestException.class, () -> timeSlotUseCase.findTimeSlotByFilters(queryModel, page, size, sortBy, sortDirection));
         verify(timeSlotPersistencePort, never()).findTimeSlotByFilters(any(), anyInt(), anyInt(), anyString(), anyString());
     }
 
@@ -257,11 +238,4 @@ class TimeSlotUseCaseTest {
         assertDoesNotThrow(() -> timeSlotUseCase.existHome(false));
     }
 
-    @Test
-    void testCreateDefaultTimeSlotModelDates() {
-        TimeSlotModel timeSlot = TimeSlotModelFactory.createDefaultTimeSlotModel();
-        System.out.println("Factory StartTime: " + timeSlot.getStartTime());
-        System.out.println("Factory EndTime: " + timeSlot.getEndTime());
-        assert timeSlot.getEndTime().isAfter(timeSlot.getStartTime());
-    }
 }
