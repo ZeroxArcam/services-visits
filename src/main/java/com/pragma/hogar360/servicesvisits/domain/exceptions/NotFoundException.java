@@ -1,7 +1,7 @@
 package com.pragma.hogar360.servicesvisits.domain.exceptions;
 
-public class NotFoundException extends RuntimeException {
-  public NotFoundException(String message) {
-    super(message);
-  }
+public class NotFoundException extends DomainException {
+    public NotFoundException(String errorCode,String message) {
+        super(errorCode,message);
+    }
 }

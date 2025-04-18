@@ -7,6 +7,7 @@ import com.pragma.hogar360.servicesvisits.domain.utils.Pagination;
 public interface TimeSlotServicePort {
     void save(TimeSlotModel timeSlot);
     void validateHome(Long requestedHomeId, Long actualHomeId);
+    void existHome(boolean existHome);
     Pagination<TimeSlotModel> findTimeSlotByFilters(
             TimeSlotQueryModel timeSlotQueryModel,
             Integer page,

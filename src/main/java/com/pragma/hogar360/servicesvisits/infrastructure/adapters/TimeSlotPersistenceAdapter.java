@@ -6,13 +6,13 @@ import com.pragma.hogar360.servicesvisits.domain.ports.out.TimeSlotPersistencePo
 import com.pragma.hogar360.servicesvisits.domain.utils.Pagination;
 import com.pragma.hogar360.servicesvisits.infrastructure.mappers.TimeSlotEntityMapper;
 import com.pragma.hogar360.servicesvisits.infrastructure.repositories.mysql.TimeSlotRepository;
+import com.pragma.hogar360.servicesvisits.infrastructure.utils.InfrastructureConstants;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -50,10 +50,10 @@ public class TimeSlotPersistenceAdapter implements TimeSlotPersistencePort {
     ){
         Sort sort;
         if (sortBy == null || sortBy.isEmpty()) {
-            sort = Sort.by("startTime"); // Ordenamiento por defecto
+            sort = Sort.by(InfrastructureConstants.SLOT_TIME_START);
         } else {
             sort = Sort.by(sortBy);
-            if (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) {
+            if (sortDirection != null && sortDirection.equalsIgnoreCase(InfrastructureConstants.SORT_BY_DESC)) {
                 sort = sort.descending();
             }
         }

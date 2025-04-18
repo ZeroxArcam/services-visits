@@ -11,9 +11,9 @@ public class TimeSlotModel {
 
     public TimeSlotModel(){}
 
-    public TimeSlotModel(LocalDateTime endTime, LocalDateTime startTime, Long homeId, Long sellerId, Long id) {
-        this.endTime = endTime;
+    public TimeSlotModel(LocalDateTime startTime, LocalDateTime endTime, Long homeId, Long sellerId, Long id) {
         this.startTime = startTime;
+        this.endTime = endTime;
         this.homeId = homeId;
         this.sellerId = sellerId;
         this.id = id;

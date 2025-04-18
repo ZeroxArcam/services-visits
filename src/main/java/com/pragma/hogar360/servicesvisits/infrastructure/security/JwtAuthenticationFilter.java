@@ -1,5 +1,9 @@
 package com.pragma.hogar360.servicesvisits.infrastructure.security;
 
+import com.pragma.hogar360.servicesvisits.infrastructure.exceptions.UnauthorizedException;
+import com.pragma.hogar360.servicesvisits.infrastructure.exceptionshandler.ExceptionConstants;
+import com.pragma.hogar360.servicesvisits.infrastructure.utils.InfrastructureConstants;
+import com.pragma.hogar360.servicesvisits.infrastructure.utils.JwtErrorResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,13 +12,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
 
@@ -43,49 +48,64 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        final List<org.springframework.security.core.authority.SimpleGrantedAuthority> roles = jwtService.extractRoles(jwt);
 
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (jwtService.isTokenValid(jwt)) {
-                final Long userId = jwtService.extractUserIdFromToken(jwt);
-                final String email = jwtService.extractEmailFromToken(jwt);
-                String username = null;
-                if (userId != null) {
-                    username = String.valueOf(userId);
-                    log.info("👤 User ID extracted from JWT: {}", username);
-                    log.info("🛡️ Roles extracted from JWT: {}", roles);
+        try {
+            final List<SimpleGrantedAuthority> roles = jwtService.extractRoles(jwt);
 
-                    UserDetails userDetails = new User(username, "", roles);
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (jwtService.isTokenValid(jwt)) {
+                    Long userId = jwtService.extractUserIdFromToken(jwt);
+                    String email = jwtService.extractEmailFromToken(jwt);
+
+                    if (userId == null || email == null) {
+                        throw new RuntimeException("Faltan datos del token");
+                    }
+
+                    UserDetails userDetails = new User(String.valueOf(userId), "", roles);
 
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities()
                     );
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                    log.info("✅ Authentication set in SecurityContextHolder for user ID: {}", username);
-
                     request.setAttribute(USER_ID_REQUEST_ATTRIBUTE, userId);
-                    log.debug("🔑 User ID extracted from token and set as request attribute: {}", userId);
-                } else {
-                    log.warn("⚠️ Could not extract user ID from token.");
-                }
-                if (email != null) {
-                    log.info("📧 Email extracted from JWT: {}", email);
                     request.setAttribute(USER_EMAIL_REQUEST_ATTRIBUTE, email);
-                    log.debug("📧 Email extracted from token and set as request attribute: {}", email);
-                    //username = (username != null) ? username : email;
                 } else {
-                    log.warn("⚠️ Could not extract email from token.");
+                    throw new UnauthorizedException(ExceptionConstants.INVALID_TOKEN_ERROR_CODE,ExceptionConstants.JWT_EXPIRED_MESSAGE_EN);
+
                 }
-            } else {
-                log.warn("⚠️ Invalid JWT token");
             }
+
+            filterChain.doFilter(request, response);
+
+        }catch (Exception e) {
+            log.error("❌ Error en JwtAuthenticationFilter: {}", e.getMessage());
+
+            String errorMessage = e.getMessage();
+            String errorCode = "H360-401-000"; // Default error code
+
+            if (e instanceof UnauthorizedException unauthorizedEx) {
+                errorMessage = unauthorizedEx.getMessage();
+                errorCode = unauthorizedEx.getErrorCode();
+            }
+
+            // Aquí usamos la plantilla con el mensaje
+            String formattedMessage = String.format(InfrastructureConstants.UNAUTHORIZED_MESSAGE_TEMPLATE, errorMessage);
+
+            JwtErrorResponse errorResponse = new JwtErrorResponse(
+                    formattedMessage,
+                    errorCode
+            );
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            new ObjectMapper().writeValue(response.getWriter(), errorResponse);
         }
-        filterChain.doFilter(request, response);
+
+
     }
+
 }

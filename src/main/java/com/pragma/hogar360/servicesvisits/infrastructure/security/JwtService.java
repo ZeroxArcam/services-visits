@@ -1,6 +1,9 @@
 package com.pragma.hogar360.servicesvisits.infrastructure.security;
 
+import com.pragma.hogar360.servicesvisits.infrastructure.exceptions.UnauthorizedException;
+import com.pragma.hogar360.servicesvisits.infrastructure.exceptionshandler.ExceptionConstants;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -83,14 +86,21 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        log.debug("JwtService (home) - Parsing token: {}", token);
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSignInKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        //log.debug("JwtService (home) - Parsing token: {}", token);
+        try {
+            return Jwts
+                    .parserBuilder()
+                    .setSigningKey(getSignInKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            log.warn("Token expired: {}", e.getMessage());
+            throw new UnauthorizedException(ExceptionConstants.INVALID_TOKEN_ERROR_CODE,ExceptionConstants.JWT_EXPIRED_MESSAGE_EN);
+
+        }
     }
+
 
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
