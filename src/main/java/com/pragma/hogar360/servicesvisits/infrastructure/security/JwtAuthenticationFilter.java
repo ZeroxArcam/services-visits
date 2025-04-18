@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String email = jwtService.extractEmailFromToken(jwt);
 
                     if (userId == null || email == null) {
-                        throw new RuntimeException("Faltan datos del token");
+                        throw new UnauthorizedException(ExceptionConstants.MISSING_TOKEN_DATA_ERROR_CODE, ExceptionConstants.MISSING_TOKEN_DATA_MESSAGE_EN);
                     }
 
                     UserDetails userDetails = new User(String.valueOf(userId), "", roles);
@@ -85,16 +85,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.error("❌ Error en JwtAuthenticationFilter: {}", e.getMessage());
 
             String errorMessage = e.getMessage();
-            String errorCode = "H360-401-000"; // Default error code
+            String errorCode = "H360-401-000";
 
             if (e instanceof UnauthorizedException unauthorizedEx) {
                 errorMessage = unauthorizedEx.getMessage();
                 errorCode = unauthorizedEx.getErrorCode();
             }
 
-            // Aquí usamos la plantilla con el mensaje
             String formattedMessage = String.format(InfrastructureConstants.UNAUTHORIZED_MESSAGE_TEMPLATE, errorMessage);
-
             JwtErrorResponse errorResponse = new JwtErrorResponse(
                     formattedMessage,
                     errorCode

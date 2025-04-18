@@ -1,8 +1,10 @@
 package com.pragma.hogar360.servicesvisits.domain.utils.constants;
 
 import java.text.MessageFormat;
+import java.util.function.Function;
 
 public enum ErrorCode {
+
     TIME_SLOT_NULL("ERR_TIME_SLOT_NULL", "The TimeSlot can not be null."),
     INVALID_HOME_ID("ERR_INVALID_HOME_ID", "The homeId must be positive."),
     INVALID_SELLER_ID("ERR_INVALID_SELLER_ID", "The sellerId must be positive."),
@@ -18,16 +20,27 @@ public enum ErrorCode {
     INVALID_PAGE("ERR_INVALID_PAGE", "The page number must be non-negative."),
     INVALID_SIZE("ERR_INVALID_SIZE", "The size must be greater than zero."),
     INVALID_SORT_BY("ERR_INVALID_SORT_BY", "The sortBy value is invalid. Allowed values are: {0}."),
-    INVALID_SORT_DIRECTION("ERR_INVALID_SORT_DIRECTION", "The sortDirection must be either 'ASC' or 'DESC'.");
-
-            ;
+    INVALID_SORT_DIRECTION("ERR_INVALID_SORT_DIRECTION", "The sortDirection must be either 'ASC' or 'DESC'."),
+    INVALID_TIME_SLOT_ID("ERR_INVALID_TIME_SLOT_ID", "The TimeSlot ID cannot be null."),
+    INVALID_CUSTOMER_EMAIL("ERR_INVALID_CUSTOMER_EMAIL", "The customer email cannot be null or empty."),
+    TIME_SLOT_NOT_FOUND("TIME_SLOT_NOT_FOUND", args -> "The time slot with ID " + args[0] + " does not exist"),
+    VISIT_LIMIT_REACHED("VISIT_LIMIT_REACHED", args -> "Maximum " + DomainConstants.MAX_VISITS_PER_SLOT + " customers allowed. Already booked: " + args[0]),
+    ALREADY_BOOKED("ALREADY_BOOKED", args -> "Customer " + args[0] + " has already booked the time slot with ID " + args[1]);
 
     private final String code;
     private final String messageTemplate;
+    private final Function<Object[], String> dynamicMessage;
 
     ErrorCode(String code, String messageTemplate) {
         this.code = code;
         this.messageTemplate = messageTemplate;
+        this.dynamicMessage = null;
+    }
+
+    ErrorCode(String code, Function<Object[], String> dynamicMessage) {
+        this.code = code;
+        this.messageTemplate = null;
+        this.dynamicMessage = dynamicMessage;
     }
 
     public String code() {
@@ -35,6 +48,9 @@ public enum ErrorCode {
     }
 
     public String message(Object... args) {
+        if (dynamicMessage != null) {
+            return dynamicMessage.apply(args);
+        }
         return MessageFormat.format(messageTemplate, args);
     }
 }

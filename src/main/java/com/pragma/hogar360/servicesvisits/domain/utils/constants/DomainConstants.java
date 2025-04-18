@@ -13,6 +13,7 @@ public class DomainConstants {
     public static int MAX_PAGE_SIZE = 100;
     public static int MIN_PAGE_SIZE = 1;
     public static int MIN_PAGE_NUMBER = 0;
+    public static final Long MAX_VISITS_PER_SLOT = 2L;
     public static List<String> VALID_SORT_BY_VALUES = Arrays.asList("startTime", "endTime");
     public static String SORT_ASC="ASC";
     public static String SORT_DESC="DESC";
