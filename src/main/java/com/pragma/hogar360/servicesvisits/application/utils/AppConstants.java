@@ -9,4 +9,5 @@ public class AppConstants {
     public static final String DEFAULT_SORT_BY = "price";
     public static final String DEFAULT_SORT_DIRECTION = "ASC";
     public static final String TIME_SLOT_CREATED_RESPONSE = "Time slot created";
+    public static final String VISIT_CREATED = "Visit created";
 }

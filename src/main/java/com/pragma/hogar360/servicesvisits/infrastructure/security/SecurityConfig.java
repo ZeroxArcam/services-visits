@@ -2,6 +2,7 @@ package com.pragma.hogar360.servicesvisits.infrastructure.security;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,6 +23,8 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    @Value("${cors.allowed-origins}")
+    private String allowedOriginsString;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -30,6 +33,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/time-slots/create").hasRole("SELLER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/time-slots/search").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/v1/visits/create").hasRole("CUSTOMER")
                         .anyRequest().permitAll()
                 )
@@ -40,7 +44,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("*"));
+
+        if (allowedOriginsString != null && !allowedOriginsString.isEmpty()) {
+            configuration.setAllowedOrigins(Arrays.asList(allowedOriginsString.split(",")));
+        }
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
