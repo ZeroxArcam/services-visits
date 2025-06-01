@@ -1,19 +1,20 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="services-visits [bootRun]" type="GradleRunConfiguration" factoryName="Gradle">
+  <configuration default="false" name="services-visits TiDB" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
       <option name="env">
         <map>
           <entry key="CORS_ALLOWED_ORIGINS" value="http://localhost:4200" />
-          <entry key="DB_PASSWORD" value="Zerox_1995" />
-          <entry key="DB_URL" value="jdbc:mysql://localhost:3306/services_visits" />
-          <entry key="DB_USERNAME" value="root" />
-          <entry key="FEIGN_CLIENT" value="http://localhost:8081" />
+          <entry key="DB_PASSWORD" value="J9Cvhc53NfFYDNU6" />
+          <entry key="DB_URL" value="jdbc:mysql://h1PYDRZb685tnA8.root:J9Cvhc53NfFYDNU6@gateway01.us-east-1.prod.aws.tidbcloud.com:4000/test?sslMode=VERIFY_IDENTITY" />
+          <entry key="DB_USERNAME" value="h1PYDRZb685tnA8.root" />
+          <entry key="FEIGN_CLIENT" value="https://services-home.onrender.com " />
           <entry key="JWT_SECRET" value="qjChvs5GKrfbSWFanKIM81EPaSTMrhtInMb6GWJv0MfhxcC1KEyCqj6eTnl6UKRbTpzInXmW86fTL0RVNjKV5A==" />
         </map>
       </option>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
+      <option name="passParentEnvs" value="false" />
       <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
         <list />
